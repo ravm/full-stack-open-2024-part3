@@ -37,6 +37,17 @@ app.get('/info', (req, res) => {
     res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${req_date}</p>`)
 })
 
+app.get('/api/persons/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const person = persons.find(person => person.id === id)
+
+    if (person) {
+        res.json(person)
+    } else {
+        res.status(404).send(`<h2>ERROR 404:</h2><p>Person with id ${id} not found</p>`)
+    }
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${3001}`)
