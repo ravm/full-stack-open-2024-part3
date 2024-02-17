@@ -27,7 +27,15 @@ let persons = [
     }
 ]
 
+morgan.token('body', (req, res) => JSON.stringify(req.body))
+
 app.use(morgan('tiny'))
+
+app.use(morgan(':body', {
+    skip: function (req, res) {
+        return res.statusCode !== 200
+    }
+}))
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
