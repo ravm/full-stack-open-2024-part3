@@ -49,7 +49,6 @@ app.get('/info', (req, res) => {
         persons = p.length
         res.send(`<p>Phonebook has info for ${persons} people</p><p>${req_date}</p>`)
     })
-    
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
