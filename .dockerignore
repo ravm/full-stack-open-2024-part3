@@ -127,3 +127,7 @@ out
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+fly secrets set
+MONGODB_URI=mongodb+srv://fullstack:manteli24@cluster0.ivge3qw.mongodb.net/phoneBook?retryWrites=true&w=majority&appName=Cluster0
+PORT=3001
