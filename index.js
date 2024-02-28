@@ -24,6 +24,8 @@ const errorHandler = (err, req, res, next) => {
 
     if (err.name === 'CastError') {
         return res.status(400).send({ error: 'malformatted id' })
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).json({ error: err.message })
     }
     next(err)
 }
@@ -36,23 +38,32 @@ app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/persons', (req, res) => {
-    Person.find({}).then(persons => {
-        res.json(persons)
-    })
+app.get('/api/persons', (req, res, next) => {
+    Person
+        .find({})
+        .then(persons => {
+            res.json(persons)
+        })
+        .catch(err => {
+            next(err)
+        })
 })
 
-app.get('/info', (req, res) => {
+app.get('/info', (req, res, next) => {
     let persons = 0
     const req_date = new Date()
-    Person.find({}).then(p => {
-        persons = p.length
-        res.send(`<p>Phonebook has info for ${persons} people</p><p>${req_date}</p>`)
-    })
+    Person
+        .find({})
+        .then(p => {
+            persons = p.length
+            res.send(`<p>Phonebook has info for ${persons} people</p><p>${req_date}</p>`)
+        })
+        .catch(err => next(err))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
-    Person.findById(req.params.id)
+    Person
+        .findById(req.params.id)
         .then(person => {
             if (person) {
                 res.json(person)
@@ -64,8 +75,9 @@ app.get('/api/persons/:id', (req, res, next) => {
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndDelete(req.params.id)
-        .then(result => {
+    Person
+        .findByIdAndDelete(req.params.id)
+        .then(() => {
             res.status(204).end()
         })
         .catch(err => next(err))
@@ -85,28 +97,29 @@ app.post('/api/persons', (req, res, next) => {
         number: body.number
     })
 
-    person.save()
+    person
+        .save()
         .then(savedPerson => {
             res.json(savedPerson)
         })
         .catch(err => {
+            console.log(err.name)
             next(err)
         })
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-    const body = req.body
+    const { name, number } = req.body
 
-    const person = {
-        name: body.name,
-        number: body.number
-    }
-
-    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    Person
+        .findByIdAndUpdate(req.params.id, { name, number }, { new: true, runValidators: true, context: 'query' })
         .then(updatedPerson => {
             res.json(updatedPerson)
         })
-        .catch(err => next(err))
+        .catch(err => {
+            console.log(err.name)
+            next(err)
+        })
 })
 
 app.use(unknownEndpoint)
